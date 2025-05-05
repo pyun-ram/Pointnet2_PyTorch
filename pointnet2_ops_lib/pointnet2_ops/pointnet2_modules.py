@@ -48,9 +48,10 @@ class _PointnetSAModuleBase(nn.Module):
         new_features_list = []
 
         xyz_flipped = xyz.transpose(1, 2).contiguous()
+        new_xyz_idx = pointnet2_utils.furthest_point_sample(xyz, self.npoint)
         new_xyz = (
             pointnet2_utils.gather_operation(
-                xyz_flipped, pointnet2_utils.furthest_point_sample(xyz, self.npoint)
+                xyz_flipped, new_xyz_idx
             )
             .transpose(1, 2)
             .contiguous()
@@ -71,7 +72,7 @@ class _PointnetSAModuleBase(nn.Module):
 
             new_features_list.append(new_features)
 
-        return new_xyz, torch.cat(new_features_list, dim=1)
+        return new_xyz, torch.cat(new_features_list, dim=1), new_xyz_idx
 
 
 class PointnetSAModuleMSG(_PointnetSAModuleBase):
